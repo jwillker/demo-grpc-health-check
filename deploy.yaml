@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    run: server
+  name: server
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      run: server
+  template:
+    metadata:
+      labels:
+        run: server
+    spec:
+      containers:
+      - name: greeter-server
+        image: helloworld:latest
+        imagePullPolicy: Never
+        args:
+        - /bin/greeter_server
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: server
+  name: server
+spec:
+  ports:
+  - name: grpc
+    port: 50051
+    targetPort: 50051
+  selector:
+    run: server
+  sessionAffinity: None
+  type: ClusterIP
