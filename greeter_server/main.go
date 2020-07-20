@@ -53,10 +53,8 @@ func (s *server) SayHelloAgain(ctx context.Context, in *pb.HelloRequest) (*pb.He
 // Health struct
 type Health struct{}
 
-// Check does the health check and changes the status of the server based on wether the db is ready or not.
 func (h *Health) Check(ctx context.Context, req *grpc_health_v1.HealthCheckRequest) (*grpc_health_v1.HealthCheckResponse, error) {
-	log.Println("🏥 K8s is health checking")
-	log.Printf("✅ Server's status is %s", grpc_health_v1.HealthCheckResponse_SERVING)
+	log.Printf("Server's status is %s", grpc_health_v1.HealthCheckResponse_SERVING)
 	return &grpc_health_v1.HealthCheckResponse{
 		Status: grpc_health_v1.HealthCheckResponse_SERVING,
 	}, nil
