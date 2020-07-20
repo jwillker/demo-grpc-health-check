@@ -20,7 +20,6 @@ type GreeterClient interface {
 	// Sends a greeting
 	SayHello(ctx context.Context, in *HelloRequest, opts ...grpc.CallOption) (*HelloReply, error)
 	SayHelloAgain(ctx context.Context, in *HelloRequest, opts ...grpc.CallOption) (*HelloReply, error)
-	Check(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error)
 }
 
 type greeterClient struct {
@@ -49,15 +48,6 @@ func (c *greeterClient) SayHelloAgain(ctx context.Context, in *HelloRequest, opt
 	return out, nil
 }
 
-func (c *greeterClient) Check(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error) {
-	out := new(HealthCheckResponse)
-	err := c.cc.Invoke(ctx, "/helloworld.Greeter/Check", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // GreeterServer is the server API for Greeter service.
 // All implementations must embed UnimplementedGreeterServer
 // for forward compatibility
@@ -65,7 +55,6 @@ type GreeterServer interface {
 	// Sends a greeting
 	SayHello(context.Context, *HelloRequest) (*HelloReply, error)
 	SayHelloAgain(context.Context, *HelloRequest) (*HelloReply, error)
-	Check(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error)
 	mustEmbedUnimplementedGreeterServer()
 }
 
@@ -78,9 +67,6 @@ func (*UnimplementedGreeterServer) SayHello(context.Context, *HelloRequest) (*He
 }
 func (*UnimplementedGreeterServer) SayHelloAgain(context.Context, *HelloRequest) (*HelloReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SayHelloAgain not implemented")
-}
-func (*UnimplementedGreeterServer) Check(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Check not implemented")
 }
 func (*UnimplementedGreeterServer) mustEmbedUnimplementedGreeterServer() {}
 
@@ -124,24 +110,6 @@ func _Greeter_SayHelloAgain_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Greeter_Check_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(HealthCheckRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(GreeterServer).Check(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/helloworld.Greeter/Check",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GreeterServer).Check(ctx, req.(*HealthCheckRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 var _Greeter_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "helloworld.Greeter",
 	HandlerType: (*GreeterServer)(nil),
@@ -153,122 +121,6 @@ var _Greeter_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SayHelloAgain",
 			Handler:    _Greeter_SayHelloAgain_Handler,
-		},
-		{
-			MethodName: "Check",
-			Handler:    _Greeter_Check_Handler,
-		},
-	},
-	Streams:  []grpc.StreamDesc{},
-	Metadata: "helloworld/helloworld.proto",
-}
-
-// HealthClient is the client API for Health service.
-//
-// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type HealthClient interface {
-	Check(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error)
-	Watch(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error)
-}
-
-type healthClient struct {
-	cc grpc.ClientConnInterface
-}
-
-func NewHealthClient(cc grpc.ClientConnInterface) HealthClient {
-	return &healthClient{cc}
-}
-
-func (c *healthClient) Check(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error) {
-	out := new(HealthCheckResponse)
-	err := c.cc.Invoke(ctx, "/helloworld.Health/Check", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *healthClient) Watch(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error) {
-	out := new(HealthCheckResponse)
-	err := c.cc.Invoke(ctx, "/helloworld.Health/Watch", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// HealthServer is the server API for Health service.
-// All implementations must embed UnimplementedHealthServer
-// for forward compatibility
-type HealthServer interface {
-	Check(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error)
-	Watch(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error)
-	mustEmbedUnimplementedHealthServer()
-}
-
-// UnimplementedHealthServer must be embedded to have forward compatible implementations.
-type UnimplementedHealthServer struct {
-}
-
-func (*UnimplementedHealthServer) Check(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Check not implemented")
-}
-func (*UnimplementedHealthServer) Watch(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Watch not implemented")
-}
-func (*UnimplementedHealthServer) mustEmbedUnimplementedHealthServer() {}
-
-func RegisterHealthServer(s *grpc.Server, srv HealthServer) {
-	s.RegisterService(&_Health_serviceDesc, srv)
-}
-
-func _Health_Check_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(HealthCheckRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(HealthServer).Check(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/helloworld.Health/Check",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(HealthServer).Check(ctx, req.(*HealthCheckRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Health_Watch_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(HealthCheckRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(HealthServer).Watch(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/helloworld.Health/Watch",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(HealthServer).Watch(ctx, req.(*HealthCheckRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-var _Health_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "helloworld.Health",
-	HandlerType: (*HealthServer)(nil),
-	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "Check",
-			Handler:    _Health_Check_Handler,
-		},
-		{
-			MethodName: "Watch",
-			Handler:    _Health_Watch_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

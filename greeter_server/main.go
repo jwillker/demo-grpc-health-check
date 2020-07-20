@@ -24,11 +24,11 @@ import (
 	"log"
 	"net"
 
-  "google.golang.org/grpc/codes"
-  "google.golang.org/grpc/status"
-  "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	pb "google.golang.org/grpc/examples/helloworld/helloworld"
+	"google.golang.org/grpc/health/grpc_health_v1"
+	"google.golang.org/grpc/status"
 )
 
 const (
@@ -38,7 +38,6 @@ const (
 // server is used to implement helloworld.GreeterServer.
 type server struct {
 	pb.UnimplementedGreeterServer
-  //statusMap map[string]pb.HealthCheckResponse_ServingStatus
 }
 
 // SayHello implements helloworld.GreeterServer
@@ -48,7 +47,7 @@ func (s *server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloRe
 }
 
 func (s *server) SayHelloAgain(ctx context.Context, in *pb.HelloRequest) (*pb.HelloReply, error) {
-  return &pb.HelloReply{Message: "Hello again " + in.GetName()}, nil
+	return &pb.HelloReply{Message: "Hello again " + in.GetName()}, nil
 }
 
 // Health struct
@@ -59,7 +58,7 @@ func (h *Health) Check(ctx context.Context, req *grpc_health_v1.HealthCheckReque
 	log.Println("🏥 K8s is health checking")
 	log.Printf("✅ Server's status is %s", grpc_health_v1.HealthCheckResponse_SERVING)
 	return &grpc_health_v1.HealthCheckResponse{
-	Status: grpc_health_v1.HealthCheckResponse_SERVING,
+		Status: grpc_health_v1.HealthCheckResponse_SERVING,
 	}, nil
 }
 
@@ -74,7 +73,7 @@ func main() {
 	}
 	s := grpc.NewServer()
 	pb.RegisterGreeterServer(s, &server{})
-  grpc_health_v1.RegisterHealthServer(s, &Health{})
+	grpc_health_v1.RegisterHealthServer(s, &Health{})
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
